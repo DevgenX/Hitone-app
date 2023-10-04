@@ -1,8 +1,12 @@
 import { FC, useState } from "react";
 
-interface ScriptContent {
+import { generateScript } from "@/utils/stream";
+
+export interface ScriptContent {
   [key: string]: string;
 }
+
+const apiKey = process.env.API_KEY;
 
 const CreateScript: FC = () => {
   const availableInputs = [
@@ -27,7 +31,6 @@ const CreateScript: FC = () => {
   const [inputName, setInputName] = useState<string>("");
   const [inputLabel, setInputLabel] = useState<string>("");
 
-  // Track whether each input is in edit mode
   const [editMode, setEditMode] = useState<Record<string, boolean>>(
     Object.fromEntries(availableInputs.map((input) => [input.name, false]))
   );
@@ -43,7 +46,6 @@ const CreateScript: FC = () => {
   };
 
   const toggleEditMode = (name: string) => {
-    // Toggle edit mode for the specified input field
     setEditMode((prevEditMode) => ({
       ...prevEditMode,
       [name]: !prevEditMode[name],
@@ -51,17 +53,10 @@ const CreateScript: FC = () => {
   };
 
   const handleGenerateScript = async () => {
-    // Make a POST request to the GPT-4 API with user input to generate a personalized script
-    // Update the 'generatedScript' state with the response
-    const response = await fetch("YOUR_GPT4_API_ENDPOINT", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-    const data = await response.json();
-    setGeneratedScript(data.generatedScript);
+    if (apiKey) {
+      const generatedScript = await generateScript(apiKey, formData);
+      setGeneratedScript(generatedScript);
+    }
   };
 
   return (
@@ -89,7 +84,6 @@ const CreateScript: FC = () => {
               {input.label}:
             </label>
             {editMode[input.name] ? (
-              // Show an input field in edit mode
               <input
                 type="text"
                 id={input.name}
@@ -99,7 +93,6 @@ const CreateScript: FC = () => {
                 className="border border-gray-300 rounded-md p-2 w-full"
               />
             ) : (
-              // Show read-only text in view mode
               <div
                 onClick={() => toggleEditMode(input.name)}
                 className="border border-gray-300 rounded-md p-2 w-full cursor-pointer"
