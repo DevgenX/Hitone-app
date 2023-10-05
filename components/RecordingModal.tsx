@@ -10,7 +10,7 @@ const Record: FC<RecordContent> = () => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
   const [transcript, setTranscript] = useState<string>("");
 
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
   const apiEndPoint = process.env.END_POINT;
 
   const handleStartRecording = async () => {

@@ -1,33 +1,48 @@
 import { ScriptContent } from "@/components/CreateScript";
 
-export const generateScript = async (apiKey: string, prompt: ScriptContent) => {
+const API_KEY: string = "";
+
+const generateMessages = (formData: ScriptContent) => {
+  const userMessage = {
+    role: "user",
+    content: `I'm ${formData.name} and I want to create a short speech about ${formData.purpose} with specific content of ${formData.content} in a given situation of ${formData.situation} with a maximum of ${formData.length} words. Make it as accurate as possible and provide the best speech for me.`,
+  };
+
+  const messages = [
+    {
+      role: "system",
+      content: `You are an experienced speech writer that can write for any situation. Write a speech based on the user's request.`,
+    },
+    userMessage,
+  ];
+
+  return messages;
+};
+
+export const generateScript = async (prompt: ScriptContent) => {
+  const messages = generateMessages(prompt);
+
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${API_KEY}`,
     },
     method: "POST",
     body: JSON.stringify({
       model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a very experienced and famous script writer, write a script based on user input and make it very professional and accurate to what the user input.",
-        },
-        { role: "user", content: prompt.value },
-      ],
-      max_tokens: 120,
-      temperature: 0.0,
-      stream: true,
+      messages,
+      max_tokens: 200,
+      temperature: 0.5,
     }),
   });
 
   if (!response.ok) {
-    return;
+    console.error(`Error: ${response.status} - ${response.statusText}`);
   }
 
   const responseData = await response.json();
+
+  console.log(responseData);
 
   if (responseData && responseData.choices && responseData.choices[0].message) {
     return responseData.choices[0].message.content;

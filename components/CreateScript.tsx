@@ -6,14 +6,32 @@ export interface ScriptContent {
   [key: string]: string;
 }
 
-const apiKey = process.env.API_KEY;
-
 const CreateScript: FC = () => {
   const availableInputs = [
-    { name: "name", label: "Your Name (optional)" },
-    { name: "purpose", label: "Purpose of the Script" },
-    { name: "content", label: "Script Content" },
-    { name: "situation", label: "Situation (e.g., Business Meeting)" },
+    { name: "name", label: "Your Name", placeholder: "e.g John" },
+    {
+      name: "purpose",
+      label: "Purpose of the Speech",
+      placeholder:
+        "Please describe the purpose or objective of the speech you need",
+    },
+    {
+      name: "content",
+      label: "Summary of Content",
+      placeholder:
+        "Provide a brief summary of the content you want in the speech",
+    },
+    {
+      name: "situation",
+      label: "Situation (e.g., Business Meeting)",
+      placeholder:
+        "Describe the situation or context in which this speech will be used",
+    },
+    {
+      name: "length",
+      label: "Length of the speech",
+      placeholder: "0-500 words",
+    },
   ];
 
   const defaultFormData: ScriptContent = {};
@@ -21,15 +39,23 @@ const CreateScript: FC = () => {
     defaultFormData[input.name] = "";
   });
 
-  const handleAddInputs = (inputName: string, inputLabel: string) => {
-    const newInputs = { name: inputName, label: inputLabel };
-    availableInputs.push(newInputs);
-  };
-
   const [formData, setFormData] = useState<ScriptContent>(defaultFormData);
   const [generatedScript, setGeneratedScript] = useState<string | null>(null);
   const [inputName, setInputName] = useState<string>("");
   const [inputLabel, setInputLabel] = useState<string>("");
+
+  const handleAddInputs = (
+    inputName: string,
+    inputLabel: string,
+    placeholder?: string
+  ) => {
+    const newInputs = {
+      name: inputName,
+      label: inputLabel,
+      placeholder: placeholder || "",
+    };
+    availableInputs.push(newInputs);
+  };
 
   const [editMode, setEditMode] = useState<Record<string, boolean>>(
     Object.fromEntries(availableInputs.map((input) => [input.name, false]))
@@ -53,16 +79,18 @@ const CreateScript: FC = () => {
   };
 
   const handleGenerateScript = async () => {
-    if (apiKey) {
-      const generatedScript = await generateScript(apiKey, formData);
+    try {
+      const generatedScript = await generateScript(formData);
       setGeneratedScript(generatedScript);
+    } catch (error) {
+      console.error("Error generating script:", error);
     }
   };
 
   return (
     <div className="container w-1/2 mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-center">
-        Generate Your Script
+        Generate Your Speech
       </h1>
       <div className="text-sm text-center">
         <p>
@@ -85,12 +113,13 @@ const CreateScript: FC = () => {
             </label>
             {editMode[input.name] ? (
               <input
-                type="text"
+                type={input.name === "length" ? "number" : "text"}
                 id={input.name}
                 name={input.name}
                 value={formData[input.name]}
                 onChange={handleInputChange}
-                className="border border-gray-300 rounded-md p-2 w-full"
+                className="border border-gray-300 text-black rounded-md p-2 w-full"
+                placeholder={input.placeholder}
               />
             ) : (
               <div
