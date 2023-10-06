@@ -1,36 +1,27 @@
-export default async function transcribeAudioToText(
-  audioBlob: Blob,
-  apiKey: string,
-  apiEndpoint: string
-) {
+export const sendAudioToWhisper = async (audioFile: Blob) => {
   try {
     const formData = new FormData();
-    formData.append("audio", audioBlob, "recording.mp4");
+    formData.append("audio", audioFile);
 
-    const response = await fetch(apiEndpoint, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: formData,
-    });
+    const response = await fetch(
+      "https://api.openai.com/v1/audio/transcriptions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer YOUR_WHISPER_API_KEY",
+        },
+        body: formData,
+      }
+    );
 
-    if (response.ok) {
-      // Parse the response JSON to get the transcription
-      const data = await response.json();
-      const transcription = data.text;
-
-      return transcription;
-    } else {
-      throw new Error(
-        `Whisper ASR API Error: ${response.status} ${response.statusText}`
-      );
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
+
+    const responseData = await response.json();
+    console.log("Whisper API response:", responseData);
+    return responseData;
   } catch (error) {
-    let errorMessage = "Failed to do something exceptional";
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    console.log(errorMessage);
+    console.error("Error sending audio to Whisper:", error);
   }
-}
+};

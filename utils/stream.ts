@@ -2,6 +2,32 @@ import { ScriptContent } from "@/components/CreateScript";
 
 const API_KEY: string = "";
 
+// import { createFFmpeg, fetchFile, FFmpeg } from "@ffmpeg/ffmpeg";
+// export const convertToSupportedFormat = async (
+//   webmBlob: Blob
+// ): Promise<Blob> => {
+//   const ffmpeg = createFFmpeg({ log: false });
+//   await ffmpeg.load();
+
+//   const inputName = "input.webm";
+//   const outputName = `output.mp3`;
+
+//   ffmpeg.FS(
+//     "writeFile",
+//     inputName,
+//     new Uint8Array(await webmBlob.arrayBuffer())
+//   );
+
+//   await ffmpeg.run("-i", inputName, outputName);
+
+//   const outputData = ffmpeg.FS("readFile", outputName);
+//   const outputBlob = new Blob([outputData.buffer], {
+//     type: `audio/mp3`,
+//   });
+
+//   return outputBlob;
+// };
+
 const generateMessages = (formData: ScriptContent) => {
   const userMessage = {
     role: "user",
@@ -42,9 +68,34 @@ export const generateScript = async (prompt: ScriptContent) => {
 
   const responseData = await response.json();
 
-  console.log(responseData);
-
   if (responseData && responseData.choices && responseData.choices[0].message) {
     return responseData.choices[0].message.content;
+  }
+};
+
+export const sendAudioToWhisper = async (audioFile: Blob) => {
+  try {
+    const formData = new FormData();
+    formData.append("audio", audioFile, "recorded-audio.webm");
+
+    const response = await fetch(
+      "https://api.openai.com/v1/audio/transcriptions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    console.log(responseData);
+  } catch (error) {
+    console.error("Error sending audio to Whisper:", error);
   }
 };

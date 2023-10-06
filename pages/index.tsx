@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
-import CreateScript from "@/components/CreateScript";
-import Record from "@/components/RecordingModal";
+
+import Main from "@/components/Main";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -9,8 +9,7 @@ export default function Home() {
     <main
       className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
     >
-      <CreateScript />
-      {/* <Record /> */}
+      <Main />
     </main>
   );
 }
