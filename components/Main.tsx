@@ -1,15 +1,14 @@
-import React from "react";
+import { FC, useState } from "react";
 
 import CreateScript from "./CreateScript";
-import Recording from "./Recording";
 
 interface MainProps {}
 
-const Main = () => {
+const Main: FC<MainProps> = () => {
   return (
-    <>
+    <div className="min-h-[200px] min-w-full">
       <CreateScript />
-    </>
+    </div>
   );
 };
 export default Main;

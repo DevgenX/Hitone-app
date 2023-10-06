@@ -1,61 +1,95 @@
-import { FC, useState } from "react";
-import { AudioRecorder } from "react-audio-voice-recorder";
+import React, { useState, useEffect } from "react";
+import { useAudioRecorder } from "react-audio-voice-recorder";
+import { LiveAudioVisualizer } from "react-audio-visualize";
+
 import { sendAudioToWhisper } from "@/utils/stream";
-import styles from "../../styles/RecordingModal.module.css";
 
-interface RecordProps {}
+import Icons from "./Icons";
 
-const Record: FC<RecordProps> = () => {
-  const [recording, setRecording] = useState(false);
+const Record = () => {
+  const {
+    startRecording,
+    stopRecording,
+    togglePauseResume,
+    recordingBlob,
+    isRecording,
+    isPaused,
+    recordingTime,
+    mediaRecorder,
+  } = useAudioRecorder();
+
+  const [isStarted, setIsStarted] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [transcript, setTranscript] = useState<string>("");
 
-  const blobToAudioFile = (blob: Blob) => {
-    const audioFile = new File([blob], "recorded-audio.webm", {
-      type: "audio/webm",
-    });
-    return audioFile;
+  const handleStartRecording = () => {
+    startRecording();
+    setIsStarted(true);
   };
 
-  const onRecordingComplete = async (blob: Blob) => {
-    const audioFile = blobToAudioFile(blob);
-    setAudioBlob(audioFile);
-
-    console.log(blob);
-
-    // await sendAudioToWhisper(blob);
+  const handlePauseResume = () => {
+    togglePauseResume();
   };
+
+  const handleStopRecording = () => {
+    stopRecording();
+    setIsStarted(false);
+  };
+
+  useEffect(() => {
+    // Do something with recordingBlob when recording is complete
+    if (recordingBlob) {
+      // You can send the recordingBlob to your backend or perform other actions here
+
+      setAudioBlob(recordingBlob);
+    }
+  }, [recordingBlob]);
 
   return (
-    <div className="text-center">
-      <div className="flex justify-center p-3">
-        <AudioRecorder
-          onRecordingComplete={(blob) => {
-            onRecordingComplete(blob);
-          }}
-          audioTrackConstraints={{
-            noiseSuppression: true,
-            echoCancellation: true,
-          }}
-          downloadOnSavePress={false}
-          downloadFileExtension="webm"
-          showVisualizer={true}
-          classes={{
-            AudioRecorderClass: styles["play-button"],
-            AudioRecorderStartSaveClass: styles["custom-start-save-button"],
-            AudioRecorderTimerClass: styles["custom-timer"],
-            AudioRecorderStatusClass: styles["custom-status"],
-            AudioRecorderPauseResumeClass: styles["custom-pause-resume-button"],
-            AudioRecorderDiscardClass: styles["custom-discard-button"],
-          }}
-        />
+    <div className="border border-slate-00">
+      <div>
+        <h1 className="m-5 min-w-[300px]">Start Recording</h1>
       </div>
-      {audioBlob && (
-        <div>
-          <p>Performing analytics on recording...</p>
-          <audio src={URL.createObjectURL(audioBlob)} controls />
+      {isStarted ? (
+        <div className="flex flex-col justify-center items-center mt-20">
+          {mediaRecorder && (
+            <LiveAudioVisualizer
+              mediaRecorder={mediaRecorder}
+              barWidth={2}
+              gap={2}
+              width={140}
+              height={40}
+              fftSize={512}
+              maxDecibels={-10}
+              minDecibels={-80}
+              smoothingTimeConstant={0.4}
+            />
+          )}
+          <p>Recording Time: {recordingTime} seconds</p>
+          <div className="flex mt-5">
+            <div className="mr-5">
+              <button onClick={handlePauseResume}>
+                {isPaused ? <Icons name="resume" /> : <Icons name="pause" />}
+              </button>
+            </div>
+            <div>
+              <button onClick={handleStopRecording}>
+                <Icons name="stop" />
+              </button>
+            </div>
+          </div>
         </div>
+      ) : (
+        <button className="mt-20" onClick={handleStartRecording}>
+          <Icons name="mic" />
+        </button>
       )}
+      <div className="flex justify-center mt-20 p-5">
+        {audioBlob && (
+          <div>
+            <audio src={URL.createObjectURL(audioBlob)} controls />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

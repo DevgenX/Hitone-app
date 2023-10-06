@@ -1,12 +1,20 @@
 .play-button {
+  border: 2px solid red;
+  height: 100px;
+  width: 100px;
 }
 
 /* Custom styles for the audio recorder container */
 .custom-audio-recorder {
+  height: 100px;
+  width: 100px;
 }
 
 /* Custom styles for the start/save button */
 .custom-start-save-button {
+  border: 2px solid yellow;
+  height: 300px;
+  width: 300px;
 }
 
 /* Custom styles for the timer */

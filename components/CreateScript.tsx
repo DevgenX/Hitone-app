@@ -4,7 +4,6 @@ import { generateScript } from "@/utils/stream";
 import { availableInputs } from "@/helpers/availableInputs";
 
 import Recording from "./Recording";
-
 import Script from "./ui/Script";
 
 export interface ScriptContent {
@@ -12,10 +11,9 @@ export interface ScriptContent {
 }
 
 const CreateScript: FC = () => {
-  const defaultFormData: ScriptContent = {};
-  availableInputs.forEach((input) => {
-    defaultFormData[input.name] = "";
-  });
+  const defaultFormData: ScriptContent = Object.fromEntries(
+    availableInputs.map((input) => [input.name, ""])
+  );
 
   const [formData, setFormData] = useState<ScriptContent>(defaultFormData);
   const [generatedScript, setGeneratedScript] = useState<string | null>(null);
@@ -43,10 +41,10 @@ const CreateScript: FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevFormData) => ({
+      ...prevFormData,
       [name]: value,
-    });
+    }));
   };
 
   const toggleEditMode = (name: string) => {
@@ -68,7 +66,31 @@ const CreateScript: FC = () => {
   return (
     <div className="container w-1/2 mx-auto p-4">
       {generatedScript ? (
-        ""
+        <>
+          <div className="flex flex-row justify-between items-stretch border min-h-[600px] mt-20">
+            <div className="flex flex-col flex-grow m-5 mt-20 p-5">
+              <Recording />
+            </div>
+            {generatedScript && (
+              <div className="rounded-md flex-grow flex p-5 mt-20 max-h-[400px]">
+                <div className=" p-5 overflow-hidden hover:overflow-y-scroll">
+                  <h2 className="text-xl text-center font-semibold mb-2">
+                    Generated Script:
+                  </h2>
+                  <p className="whitespace-pre-line">{generatedScript}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="text-center mt-10">
+            <button
+              className="border border-gray-500 rounded-full p-2 hover:border-gray-200"
+              onClick={() => setGeneratedScript("")}
+            >
+              Regenerate
+            </button>
+          </div>
+        </>
       ) : (
         <>
           <h1 className="text-2xl font-bold mb-2 text-center">
@@ -84,28 +106,6 @@ const CreateScript: FC = () => {
               provide inaccurate information.
             </small>
           </div>
-        </>
-      )}
-
-      {generatedScript ? (
-        <div className="flex flex-row justify-between items-center">
-          <div className="flex flex-col flex-grow m-5 p-5">
-            <h1 className="text-center p-3">Start Recording</h1>
-            <Recording />
-          </div>
-          {generatedScript && (
-            <div className="border p-5 border-gray-400 bg-slate-700 rounded-md flex-grow">
-              <div className="mt-4">
-                <h2 className="text-xl font-semibold mb-2">
-                  Generated Script:
-                </h2>
-                <p className="whitespace-pre-line">{generatedScript}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div>
           <form className="mb-8 text-black">
             <Script
               formData={formData}
@@ -130,14 +130,8 @@ const CreateScript: FC = () => {
               Add more inputs
             </button>
           </div>
-        </div>
+        </>
       )}
-      {/* {generatedScript && (
-        <div className="mt-4">
-          <h2 className="text-xl font-semibold mb-2">Generated Script:</h2>
-          <p className="whitespace-pre-line">{generatedScript}</p>
-        </div>
-      )} */}
     </div>
   );
 };
