@@ -3,6 +3,7 @@ import { useAudioRecorder } from "react-audio-voice-recorder";
 import { LiveAudioVisualizer } from "react-audio-visualize";
 
 import { sendAudioToWhisper } from "@/utils/stream";
+import { convertToSupportedFormat } from "@/utils/stream";
 
 import Icons from "./Icons";
 
@@ -20,6 +21,8 @@ const Record = () => {
 
   const [isStarted, setIsStarted] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob>();
+  const [transcriptedData, setTranscriptedData] = useState<string | null>(null);
+  const [mp3File, setMp3File] = useState<Blob | null>(null);
 
   const handleStartRecording = () => {
     startRecording();
@@ -35,14 +38,67 @@ const Record = () => {
     setIsStarted(false);
   };
 
+  // const getTranscriptedData = async (blob: Blob) => {
+  //   const formData = new FormData();
+  //   formData.append("audio", blob, "recorded-audio.webm");
+
+  //   try {
+  //     const response = await fetch("/api/convert-audio", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
+
+  //     if (response.ok) {
+  //       // Check if the response is an audio file
+  //       const contentType = response.headers.get("Content-Type");
+  //       if (contentType && contentType.startsWith("audio/")) {
+  //         const mp3Data = await response.blob();
+  //         setMp3File(mp3Data);
+  //       } else {
+  //         console.log("Received unexpected response:", contentType);
+  //       }
+  //     } else {
+  //       console.log("Request failed with status:", response.status);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   }
+  // };
+
+  const getConvertedBlobToMp3 = async (blob: Blob) => {
+    const mp3File = await convertToSupportedFormat(blob);
+    setMp3File(mp3File);
+  };
+
   useEffect(() => {
     // Do something with recordingBlob when recording is complete
     if (recordingBlob) {
-      // You can send the recordingBlob to your backend or perform other actions here
-
       setAudioBlob(recordingBlob);
+      sendAudioToWhisper(recordingBlob);
+      // getConvertedBlobToMp3(recordingBlob);
+
+      // const convertAndSend = async () => {
+      //   try {
+      //     setAudioBlob(recordingBlob);
+      //     // const convertedBlobToMp3 = await convertToSupportedFormat(
+      //     //   recordingBlob
+      //     // );
+      //     // const getTranscriptData = await sendAudioToWhisper(
+      //     //   convertedBlobToMp3
+      //     // );
+      //     // if (getTranscriptData) {
+      //     //   setTranscriptedData(getTranscriptData);
+      //     // }
+      //   } catch (error) {
+      //     console.log(
+      //       "Error converting and sending audio to whisper API",
+      //       error
+      //     );
+      //   }
+      // };
+      // convertAndSend();
     }
-  }, [recordingBlob]);
+  }, [recordingBlob, audioBlob]);
 
   return (
     <div className="border border-slate-00">

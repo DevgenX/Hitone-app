@@ -19,6 +19,7 @@ const CreateScript: FC = () => {
   const [generatedScript, setGeneratedScript] = useState<string | null>(null);
   const [inputName, setInputName] = useState<string>("");
   const [inputLabel, setInputLabel] = useState<string>("");
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
 
   const handleAddInputs = (
     inputName: string,
@@ -118,7 +119,11 @@ const CreateScript: FC = () => {
             <div className="pr-4">
               <button
                 onClick={handleGenerateScript}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
+                className={`${
+                  isDisabled
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer hover:bg-blue-600"
+                } bg-blue-500  text-white py-2 px-4 rounded-md`}
               >
                 Generate Script
               </button>

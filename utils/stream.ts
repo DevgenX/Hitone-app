@@ -2,31 +2,31 @@ import { ScriptContent } from "@/components/CreateScript";
 
 const API_KEY: string = "";
 
-// import { createFFmpeg, fetchFile, FFmpeg } from "@ffmpeg/ffmpeg";
-// export const convertToSupportedFormat = async (
-//   webmBlob: Blob
-// ): Promise<Blob> => {
-//   const ffmpeg = createFFmpeg({ log: false });
-//   await ffmpeg.load();
+export const convertToSupportedFormat = async (
+  webmBlob: Blob
+): Promise<Blob> => {
+  const FFmpeg = await import("@ffmpeg/ffmpeg");
+  const ffmpeg = FFmpeg.createFFmpeg({ log: false });
+  await ffmpeg.load();
 
-//   const inputName = "input.webm";
-//   const outputName = `output.mp3`;
+  const inputName = "input.webm";
+  const outputName = `output.mp3`;
 
-//   ffmpeg.FS(
-//     "writeFile",
-//     inputName,
-//     new Uint8Array(await webmBlob.arrayBuffer())
-//   );
+  ffmpeg.FS(
+    "writeFile",
+    inputName,
+    new Uint8Array(await webmBlob.arrayBuffer())
+  );
 
-//   await ffmpeg.run("-i", inputName, outputName);
+  await ffmpeg.run("-i", inputName, outputName);
 
-//   const outputData = ffmpeg.FS("readFile", outputName);
-//   const outputBlob = new Blob([outputData.buffer], {
-//     type: `audio/mp3`,
-//   });
+  const outputData = ffmpeg.FS("readFile", outputName);
+  const outputBlob = new Blob([outputData.buffer], {
+    type: `audio/mp3`,
+  });
 
-//   return outputBlob;
-// };
+  return outputBlob;
+};
 
 const generateMessages = (formData: ScriptContent) => {
   const userMessage = {
@@ -37,7 +37,7 @@ const generateMessages = (formData: ScriptContent) => {
   const messages = [
     {
       role: "system",
-      content: `You are an experienced speech writer that can write for any situation. Write a speech based on the user's request.`,
+      content: `You are an experienced speech writer that can write for any situation. Write a speech based on the user's request. If the user didn't give a detailed explanation, you can mention his name ${formData.name} and ask for a more detailed input like the ${formData.content} and ${formData.situation}`,
     },
     userMessage,
   ];
@@ -55,7 +55,7 @@ export const generateScript = async (prompt: ScriptContent) => {
     },
     method: "POST",
     body: JSON.stringify({
-      model: "gpt-4",
+      model: "gpt-3.5-turbo",
       messages,
       max_tokens: 200,
       temperature: 0.5,
@@ -74,6 +74,7 @@ export const generateScript = async (prompt: ScriptContent) => {
 };
 
 export const sendAudioToWhisper = async (audioFile: Blob) => {
+  console.log(audioFile);
   try {
     const formData = new FormData();
     formData.append("audio", audioFile, "recorded-audio.webm");
@@ -94,7 +95,8 @@ export const sendAudioToWhisper = async (audioFile: Blob) => {
     }
 
     const responseData = await response.json();
-    console.log(responseData);
+
+    return responseData;
   } catch (error) {
     console.error("Error sending audio to Whisper:", error);
   }
