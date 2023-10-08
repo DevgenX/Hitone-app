@@ -73,11 +73,52 @@ export const generateScript = async (prompt: ScriptContent) => {
   }
 };
 
+export const rateSpeech = async (prompt: string | null) => {
+  const userMessage = [
+    {
+      role: "user",
+      content: prompt,
+    },
+    {
+      role: "system",
+      content: `You are an experienced speech writer that can analyze scripts and provide accurate feedback. 
+      Rate the user skills up to 100 and provide bulleted feedback.`,
+    },
+  ];
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${API_KEY}`,
+    },
+    method: "POST",
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: userMessage,
+      max_tokens: 200,
+      temperature: 0.5,
+    }),
+  });
+
+  if (!response.ok) {
+    console.error(`Error: ${response.status} - ${response.statusText}`);
+  }
+
+  const responseData = await response.json();
+
+  if (responseData && responseData.choices && responseData.choices[0].message) {
+    console.log(responseData.choices[0].message.content);
+    return responseData.choices[0].message.content;
+  }
+};
+
 export const sendAudioToWhisper = async (audioFile: Blob) => {
   console.log(audioFile);
   try {
     const formData = new FormData();
-    formData.append("audio", audioFile, "recorded-audio.webm");
+    formData.append("file", audioFile, "recorded-audio.webm");
+    formData.append("model", "whisper-1");
+    formData.append("language", "en");
 
     const response = await fetch(
       "https://api.openai.com/v1/audio/transcriptions",
@@ -96,7 +137,7 @@ export const sendAudioToWhisper = async (audioFile: Blob) => {
 
     const responseData = await response.json();
 
-    return responseData;
+    return responseData.text;
   } catch (error) {
     console.error("Error sending audio to Whisper:", error);
   }

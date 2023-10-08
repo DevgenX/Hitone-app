@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAudioRecorder } from "react-audio-voice-recorder";
 import { LiveAudioVisualizer } from "react-audio-visualize";
 
-import { sendAudioToWhisper } from "@/utils/stream";
+import { rateSpeech, sendAudioToWhisper } from "@/utils/stream";
 import { convertToSupportedFormat } from "@/utils/stream";
 
 import Icons from "./Icons";
@@ -22,6 +22,7 @@ const Record = () => {
   const [isStarted, setIsStarted] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob>();
   const [transcriptedData, setTranscriptedData] = useState<string | null>(null);
+  const [result, setResults] = useState<string>('');
   const [mp3File, setMp3File] = useState<Blob | null>(null);
 
   const handleStartRecording = () => {
@@ -74,31 +75,21 @@ const Record = () => {
     // Do something with recordingBlob when recording is complete
     if (recordingBlob) {
       setAudioBlob(recordingBlob);
-      sendAudioToWhisper(recordingBlob);
-      // getConvertedBlobToMp3(recordingBlob);
+      console.log(recordingBlob)
+      const convertAndSend =  async () => {
+        const transcripted = await sendAudioToWhisper(recordingBlob);
+        setTranscriptedData(transcripted);
+      }
+      convertAndSend();
+      const resultRate =  async () => {
+        const result = await rateSpeech(transcriptedData);
+        setResults(result);
+      }
 
-      // const convertAndSend = async () => {
-      //   try {
-      //     setAudioBlob(recordingBlob);
-      //     // const convertedBlobToMp3 = await convertToSupportedFormat(
-      //     //   recordingBlob
-      //     // );
-      //     // const getTranscriptData = await sendAudioToWhisper(
-      //     //   convertedBlobToMp3
-      //     // );
-      //     // if (getTranscriptData) {
-      //     //   setTranscriptedData(getTranscriptData);
-      //     // }
-      //   } catch (error) {
-      //     console.log(
-      //       "Error converting and sending audio to whisper API",
-      //       error
-      //     );
-      //   }
-      // };
-      // convertAndSend();
+      resultRate();
+    
     }
-  }, [recordingBlob, audioBlob]);
+  }, [recordingBlob]);
 
   return (
     <div className="border border-slate-00">
@@ -145,6 +136,9 @@ const Record = () => {
             <audio src={URL.createObjectURL(audioBlob)} controls />
           </div>
         )}
+      </div>
+      <div>
+        <p>{result}</p>
       </div>
     </div>
   );
