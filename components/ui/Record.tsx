@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useAudioRecorder } from "react-audio-voice-recorder";
 import { LiveAudioVisualizer } from "react-audio-visualize";
 
-import { rateSpeech, sendAudioToWhisper } from "@/utils/stream";
-import { convertToSupportedFormat } from "@/utils/stream";
-
+import { sendAudioToWhisper } from "@/utils/stream";
+import Analytics from "./Analytics";
 import Icons from "./Icons";
+import Loading from "./Loading";
 
 const Record = () => {
   const {
@@ -20,10 +20,11 @@ const Record = () => {
   } = useAudioRecorder();
 
   const [isStarted, setIsStarted] = useState(false);
-  const [audioBlob, setAudioBlob] = useState<Blob>();
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [transcriptedData, setTranscriptedData] = useState<string | null>(null);
-  const [result, setResults] = useState<string>('');
-  const [mp3File, setMp3File] = useState<Blob | null>(null);
+  const [result, setResults] = useState<string>("");
+  const [recordAgain, setIsRecordAgain] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleStartRecording = () => {
     startRecording();
@@ -39,63 +40,72 @@ const Record = () => {
     setIsStarted(false);
   };
 
-  // const getTranscriptedData = async (blob: Blob) => {
-  //   const formData = new FormData();
-  //   formData.append("audio", blob, "recorded-audio.webm");
-
-  //   try {
-  //     const response = await fetch("/api/convert-audio", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     if (response.ok) {
-  //       // Check if the response is an audio file
-  //       const contentType = response.headers.get("Content-Type");
-  //       if (contentType && contentType.startsWith("audio/")) {
-  //         const mp3Data = await response.blob();
-  //         setMp3File(mp3Data);
-  //       } else {
-  //         console.log("Received unexpected response:", contentType);
-  //       }
-  //     } else {
-  //       console.log("Request failed with status:", response.status);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // };
-
-  const getConvertedBlobToMp3 = async (blob: Blob) => {
-    const mp3File = await convertToSupportedFormat(blob);
-    setMp3File(mp3File);
-  };
-
   useEffect(() => {
-    // Do something with recordingBlob when recording is complete
     if (recordingBlob) {
       setAudioBlob(recordingBlob);
-      console.log(recordingBlob)
-      const convertAndSend =  async () => {
-        const transcripted = await sendAudioToWhisper(recordingBlob);
-        setTranscriptedData(transcripted);
-      }
-      convertAndSend();
-      const resultRate =  async () => {
-        const result = await rateSpeech(transcriptedData);
-        setResults(result);
-      }
-
-      resultRate();
-    
     }
   }, [recordingBlob]);
 
+  useEffect(() => {
+    if (audioBlob) {
+      const convertAndSend = async () => {
+        const transcripted = await sendAudioToWhisper(audioBlob);
+        setTranscriptedData(transcripted);
+      };
+      convertAndSend();
+    }
+  }, [audioBlob]);
+
+  const handleGenerateFeedback = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: transcriptedData }),
+      });
+      if (!response.ok) {
+        setIsLoading(false);
+        throw new Error(response.statusText);
+      }
+      setIsLoading(false);
+
+      const data = await response.json();
+
+      if (!data) {
+        return;
+      }
+
+      setTranscriptedData(data);
+    } catch (error) {
+      console.error("Error generating script:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRecordAgain = () => {
+    setIsRecordAgain(true);
+    setAudioBlob(null);
+    setIsStarted(true);
+  };
+
   return (
     <div className="border border-slate-00">
-      <div>
-        <h1 className="m-5 min-w-[300px]">Start Recording</h1>
+      <div className="p-5">
+        {isRecording ? (
+          isPaused ? (
+            "Recording is paused"
+          ) : (
+            "You are recording"
+          )
+        ) : (
+          <h1>Start Recording</h1>
+        )}
       </div>
+
       {isStarted ? (
         <div className="flex flex-col justify-center items-center mt-20">
           {mediaRecorder && (
@@ -130,15 +140,30 @@ const Record = () => {
           <Icons name="mic" />
         </button>
       )}
+
+      {(audioBlob || !recordAgain) && (
+        <div className="flex flex-col">
+          <div className="p-2">
+            <button className="" onClick={handleGenerateFeedback}>
+              Get feedback
+            </button>
+          </div>
+          <button className="" onClick={handleRecordAgain}>
+            Record again
+          </button>
+        </div>
+      )}
+
       <div className="flex justify-center mt-20 p-5">
         {audioBlob && (
           <div>
-            <audio src={URL.createObjectURL(audioBlob)} controls />
+            <audio
+              src={URL.createObjectURL(audioBlob)}
+              controls
+              className="m-2"
+            />
           </div>
         )}
-      </div>
-      <div>
-        <p>{result}</p>
       </div>
     </div>
   );

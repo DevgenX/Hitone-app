@@ -2,32 +2,6 @@ import { ScriptContent } from "@/components/CreateScript";
 
 const API_KEY: string = "";
 
-export const convertToSupportedFormat = async (
-  webmBlob: Blob
-): Promise<Blob> => {
-  const FFmpeg = await import("@ffmpeg/ffmpeg");
-  const ffmpeg = FFmpeg.createFFmpeg({ log: false });
-  await ffmpeg.load();
-
-  const inputName = "input.webm";
-  const outputName = `output.mp3`;
-
-  ffmpeg.FS(
-    "writeFile",
-    inputName,
-    new Uint8Array(await webmBlob.arrayBuffer())
-  );
-
-  await ffmpeg.run("-i", inputName, outputName);
-
-  const outputData = ffmpeg.FS("readFile", outputName);
-  const outputBlob = new Blob([outputData.buffer], {
-    type: `audio/mp3`,
-  });
-
-  return outputBlob;
-};
-
 const generateMessages = (formData: ScriptContent) => {
   const userMessage = {
     role: "user",
@@ -37,7 +11,7 @@ const generateMessages = (formData: ScriptContent) => {
   const messages = [
     {
       role: "system",
-      content: `You are an experienced speech writer that can write for any situation. Write a speech based on the user's request. If the user didn't give a detailed explanation, you can mention his name ${formData.name} and ask for a more detailed input like the ${formData.content} and ${formData.situation}`,
+      content: `You are an experienced speech writer that can write for any situation. Write a speech based on the user's request. If the user didn't give a detailed explanation, you can mention his name ${formData.name} and ask for a more detailed input like the ${formData.content} and ${formData.situation}. If the input are empty, you can ask the user to give a more descriptive input so that you can generate a more accurate and tailored speech for the user`,
     },
     userMessage,
   ];
@@ -81,8 +55,8 @@ export const rateSpeech = async (prompt: string | null) => {
     },
     {
       role: "system",
-      content: `You are an experienced speech writer that can analyze scripts and provide accurate feedback. 
-      Rate the user skills up to 100 and provide bulleted feedback.`,
+      content: `You are an experienced speech writer that can analyze speech and provide accurate feedback. 
+      Rate the user skills up to 100 and give an average out of 100 for all the ratings and provide bulleted feedback. Make it 2nd person view by pointing out directly to the user using "you, your, yours.". But if the content you received has a length of less than 20 words, then you can say that the user should record a more detailed speech so you can provide accurate feedback. You should also consider criticizing if the user uses too much fillers and repetitive when it comes to words. `,
     },
   ];
 
@@ -113,7 +87,6 @@ export const rateSpeech = async (prompt: string | null) => {
 };
 
 export const sendAudioToWhisper = async (audioFile: Blob) => {
-  console.log(audioFile);
   try {
     const formData = new FormData();
     formData.append("file", audioFile, "recorded-audio.webm");
