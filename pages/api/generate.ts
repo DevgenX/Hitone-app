@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { generateScript } from "@/utils/stream";
-import { ScriptContent } from "@/components/CreateScript";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

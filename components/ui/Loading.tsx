@@ -24,5 +24,4 @@ const Loading: FC<LoadingProps> = ({ text }) => {
   );
 };
 
-//#f5bc51
 export default Loading;

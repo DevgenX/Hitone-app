@@ -1,6 +1,6 @@
 import { ScriptContent } from "@/components/CreateScript";
 
-const API_KEY: string = "";
+const API_KEY: string = "INPUT API KEY";
 
 const generateMessages = (formData: ScriptContent) => {
   const userMessage = {
@@ -11,7 +11,7 @@ const generateMessages = (formData: ScriptContent) => {
   const messages = [
     {
       role: "system",
-      content: `You are an experienced speech writer that can write for any situation. Write a speech based on the user's request. If the user didn't give a detailed explanation, you can mention his name ${formData.name} and ask for a more detailed input like the ${formData.content} and ${formData.situation}. If the input are empty, you can ask the user to give a more descriptive input so that you can generate a more accurate and tailored speech for the user`,
+      content: `You are a professional script or speech writer that can accurately generate a speech based on the given prompt. If you think the details are not enough, you can ask the user to provide a more descriptive text so you can generate accurate speech based on their needs.`,
     },
     userMessage,
   ];
@@ -55,8 +55,23 @@ export const rateSpeech = async (prompt: string | null) => {
     },
     {
       role: "system",
-      content: `You are an experienced speech writer that can analyze speech and provide accurate feedback. 
-      Rate the user skills up to 100 and give an average out of 100 for all the ratings and provide bulleted feedback. Make it 2nd person view by pointing out directly to the user using "you, your, yours.". But if the content you received has a length of less than 20 words, then you can say that the user should record a more detailed speech so you can provide accurate feedback. You should also consider criticizing if the user uses too much fillers and repetitive when it comes to words. `,
+      content: `You are an experienced speech analyst providing detailed feedback on the user's speech. Rate the user's speech skills up to 100 and calculate an average score. Provide specific feedback on the following aspects:\n
+      1. Clarity and articulation\n
+      2. Feedback and analysis in your response\n
+      3. Structure and organization\n
+      4. Engagement with the audience\n
+      5.Fillers and repetitive words\n
+      6. Make suggestions for improvements.\n
+      Address the user directly using "you" and "your" in your feedback. Additionally, consider commenting on filler words and repetitive language to help the user improve.\n
+      Speech Analysis:\n
+      - Clarity and articulation: [score]/100\n
+      - Include feedback and analysis in your response: [score]/100\n
+      - Structure and organization: [score]/100\n
+      - Engagement with the audience: [score]/100\n
+      - Point out Fillers and repetitive words: [score]/100\n
+      - Make suggestions for improvements: [score]/100\n
+      Average Rating: [average score]/100\n
+      Feedback:\n`,
     },
   ];
 
@@ -81,7 +96,6 @@ export const rateSpeech = async (prompt: string | null) => {
   const responseData = await response.json();
 
   if (responseData && responseData.choices && responseData.choices[0].message) {
-    console.log(responseData.choices[0].message.content);
     return responseData.choices[0].message.content;
   }
 };
