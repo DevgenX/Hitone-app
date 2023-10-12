@@ -33,6 +33,10 @@ Step by step process
 # Requirements
 
 - Get your OpenAI API keys here [API](https://platform.openai.com/account/api-keys)
+- Go to the Utils folder under stream.ts and input your API key to the variable API_KEY
+  
+<img width="401" alt="Screenshot 2023-10-11 at 10 29 50 PM" src="https://github.com/DevgenX/Hitone-app/assets/107775878/ae900a63-b46f-4f40-8c04-185992f91144">
+
 
 # Running Locally
 
