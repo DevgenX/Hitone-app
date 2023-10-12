@@ -1,41 +1,62 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# HiTone
 
-## Getting Started
+The innovative platform for improving your speech and communication skills. HiTone allows you to create custom speech scenarios, record your speech, and receive detailed analytics to enhance your speaking abilities.
 
-First, run the development server:
+If you have any questions, feel free to reach out to me on [LinkedIn](https://www.linkedin.com/in/sebgonzales/).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+# Generating Script
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+![Screenshot 2023-10-11 at 10 07 39 PM](https://github.com/DevgenX/Hitone-app/assets/107775878/5af56cb5-8a5f-4354-8001-6871a8d12e3e)
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+# Recording yourself
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+![Screenshot 2023-10-11 at 10 13 08 PM](https://github.com/DevgenX/Hitone-app/assets/107775878/b46b5bfd-874e-4c45-9edc-6ba6f2247af7)
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+# Getting feedback 
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+![Screenshot 2023-10-11 at 10 14 04 PM](https://github.com/DevgenX/Hitone-app/assets/107775878/7a1c22b4-ef52-49e4-9593-e52a05ef337a)
 
-## Learn More
+# How It Works
+<br>
 
-To learn more about Next.js, take a look at the following resources:
+You are given a form to fill-up with the details you need for the Speech. OpenAI API will generate it for you.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Step by step process
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- Receive inputs from user
+- OpenAI API will generate the script
+- You are to record yourself speaking the speech provided
+- The recording is converted into a supported format and transcripted by Whisper API
+- OpenAI API receives the transcript and provide a feedback
+- Stream feedback back to the user
 
-## Deploy on Vercel
+# Requirements
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Get your OpenAI API keys here [API](https://platform.openai.com/account/api-keys)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-# Hitone-app
+# Running Locally
+
+1. Clone the repo
+  ```
+  git@github.com:DevgenX/Hitone-app.git
+  ```
+2. Install dependencies
+  ```
+  npm i or npm install
+  ```
+3. Running the application
+  ```
+  npm run dev
+  ```
+
+# Improvement Ideas
+Here are some ideas for how to improve HiTone:
+- Provide better UI by creating a separate route for the analytics
+- Provide accurate script generation by improving prompt
+- Improve feedback by having accurate transcriptions
+- Train own model for transcription and analysis
+- Contribute your ideas by reaching out to me!
+
+
+
+
