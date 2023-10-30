@@ -57,6 +57,7 @@ Step by step process
 Here are some ideas for how to improve HiTone:
 - Provide better UI by creating a separate route for the analytics
 - Provide accurate script generation by improving prompt
+- Allow users to add more inputs to make the script more personalized and descriptive
 - Improve feedback by having accurate transcriptions
 - Train own model for transcription and analysis
 - Contribute your ideas by reaching out to me!
